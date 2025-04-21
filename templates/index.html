@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>URL Shortener Service</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --secondary-color: #3f37c9;
+            --success-color: #4caf50;
+            --danger-color: #ef476f;
+            --warning-color: #ffd166;
+            --light-color: #f8f9fa;
+            --dark-color: #212529;
+            --border-radius: 8px;
+            --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--dark-color);
+            background-color: #f0f2f5;
+            padding: 0;
+            margin: 0;
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 2rem 0;
+            text-align: center;
+            box-shadow: var(--box-shadow);
+            margin-bottom: 2rem;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
+        }
+
+        .card {
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            margin-bottom: 2rem;
+            overflow: hidden;
+            transition: var(--transition);
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.12);
+        }
+
+        .card-header {
+            background-color: #f8f9fa;
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid #e9ecef;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-title {
+            margin: 0;
+            font-size: 1.25rem;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+        }
+
+        .card-title i {
+            margin-right: 10px;
+        }
+
+        .card-body {
+            padding: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            font-size: 1rem;
+            border: 1px solid #ced4da;
+            border-radius: var(--border-radius);
+            transition: var(--transition);
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+        }
+
+        .btn {
+            display: inline-block;
+            font-weight: 500;
+            text-align: center;
+            cursor: pointer;
+            padding: 0.75rem 1.5rem;
+            font-size: 1rem;
+            border-radius: var(--border-radius);
+            transition: var(--transition);
+            border: none;
+            color: white;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--secondary-color);
+        }
+
+        .btn-success {
+            background-color: var(--success-color);
+        }
+
+        .btn-success:hover {
+            background-color: #45a049;
+        }
+
+        .btn-danger {
+            background-color: var(--danger-color);
+        }
+
+        .btn-danger:hover {
+            background-color: #d64161;
+        }
+
+        .btn-block {
+            display: block;
+            width: 100%;
+        }
+
+        .result {
+            margin-top: 1.5rem;
+            padding: 1rem;
+            border-radius: var(--border-radius);
+            background-color: #f8f9fa;
+            border-left: 4px solid var(--primary-color);
+            display: none;
+        }
+
+        .result h3 {
+            margin-bottom: 1rem;
+            color: var(--primary-color);
+        }
+
+        .result-details {
+            display: grid;
+            grid-template-columns: 1fr 3fr;
+            gap: 0.5rem;
+        }
+
+        .result-label {
+            font-weight: 600;
+        }
+
+        .result-value {
+            word-break: break-all;
+        }
+
+        .result-value a {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .result-value a:hover {
+            text-decoration: underline;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .action-buttons .btn {
+            flex: 1;
+        }
+
+        .stats-group {
+            display: flex;
+            justify-content: space-between;
+            background-color: #f8f9fa;
+            border-radius: var(--border-radius);
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .stat-label {
+            font-size: 0.875rem;
+            color: #6c757d;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 1rem;
+            border-radius: var(--border-radius);
+            background-color: white;
+            color: var(--dark-color);
+            box-shadow: var(--box-shadow);
+            z-index: 1000;
+            max-width: 300px;
+            display: none;
+            animation: slide-in 0.3s ease;
+        }
+
+        .notification.success {
+            border-left: 4px solid var(--success-color);
+        }
+
+        .notification.error {
+            border-left: 4px solid var(--danger-color);
+        }
+
+        @keyframes slide-in {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid #dee2e6;
+            margin-bottom: 1.5rem;
+        }
+
+        .tab {
+            padding: 0.75rem 1rem;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            margin-right: 0.5rem;
+            transition: var(--transition);
+        }
+
+        .tab.active {
+            border-bottom-color: var(--primary-color);
+            color: var(--primary-color);
+            font-weight: 500;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .copy-btn {
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            color: var(--primary-color);
+            margin-left: 0.5rem;
+        }
+
+        .footer {
+            padding: 2rem 0;
+            text-align: center;
+            color: #6c757d;
+            margin-top: 2rem;
+            border-top: 1px solid #dee2e6;
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                padding: 1.5rem 0;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .card-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="container">
+            <h1><i class="fas fa-link"></i> URL Shortener Service</h1>
+            <p>Create, manage, and track your shortened URLs</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="tabs">
+            <div class="tab active" data-tab="create">Create</div>
+            <div class="tab" data-tab="manage">Manage</div>
+            <div class="tab" data-tab="stats">Statistics</div>
+        </div>
+
+        <!-- Create Tab -->
+        <div class="tab-content active" id="create-tab">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title"><i class="fas fa-plus-circle"></i> Create Short URL</h2>
+                </div>
+                <div class="card-body">
+                    <div class="form-group">
+                        <label for="long-url">Enter a long URL</label>
+                        <input type="text" id="long-url" class="form-control" placeholder="https://example.com/very/long/url/that/needs/shortening">
+                    </div>
+                    <button class="btn btn-primary btn-block" onclick="shortenUrl()"><i class="fas fa-compress-alt"></i> Shorten URL</button>
+                    
+                    <div id="shorten-result" class="result">
+                        <h3>URL Created Successfully</h3>
+                        <div class="result-details">
+                            <div class="result-label">Short URL:</div>
+                            <div class="result-value" id="short-url-value"></div>
+                            
+                            <div class="result-label">Original URL:</div>
+                            <div class="result-value" id="original-url-value"></div>
+                            
+                            <div class="result-label">Short Code:</div>
+                            <div class="result-value" id="short-code-value"></div>
+                            
+                            <div class="result-label">Created:</div>
+                            <div class="result-value" id="created-at-value"></div>
+                        </div>
+                        <div class="action-buttons">
+                            <button class="btn btn-success" onclick="copyToClipboard('short-url-value')">
+                                <i class="fas fa-copy"></i> Copy Short URL
+                            </button>
+                            <button class="btn btn-primary" onclick="switchToManage()">
+                                <i class="fas fa-cog"></i> Manage URL
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Manage Tab -->
+        <div class="tab-content" id="manage-tab">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title"><i class="fas fa-cog"></i> Manage URLs</h2>
+                </div>
+                <div class="card-body">
+                    <div class="form-group">
+                        <label for="manage-short-code">Enter a short code</label>
+                        <input type="text" id="manage-short-code" class="form-control" placeholder="abc123">
+                    </div>
+                    <button class="btn btn-primary btn-block" onclick="getUrlDetails()"><i class="fas fa-search"></i> Get URL Details</button>
+                    
+                    <div id="details-result" class="result">
+                        <h3>URL Details</h3>
+                        <div class="result-details">
+                            <div class="result-label">Original URL:</div>
+                            <div class="result-value" id="details-original-url"></div>
+                            
+                            <div class="result-label">Short Code:</div>
+                            <div class="result-value" id="details-short-code"></div>
+                            
+                            <div class="result-label">Created:</div>
+                            <div class="result-value" id="details-created-at"></div>
+                            
+                            <div class="result-label">Last Updated:</div>
+                            <div class="result-value" id="details-updated-at"></div>
+                        </div>
+                        
+                        <div class="form-group" style="margin-top: 1.5rem;">
+                            <label for="update-url">Update URL</label>
+                            <input type="text" id="update-url" class="form-control" placeholder="Enter new URL">
+                        </div>
+                        
+                        <div class="action-buttons">
+                            <button class="btn btn-primary" onclick="updateUrl()">
+                                <i class="fas fa-edit"></i> Update
+                            </button>
+                            <button class="btn btn-danger" onclick="deleteUrl()">
+                                <i class="fas fa-trash-alt"></i> Delete
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats Tab -->
+        <div class="tab-content" id="stats-tab">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title"><i class="fas fa-chart-bar"></i> URL Statistics</h2>
+                </div>
+                <div class="card-body">
+                    <div class="form-group">
+                        <label for="stats-short-code">Enter a short code</label>
+                        <input type="text" id="stats-short-code" class="form-control" placeholder="abc123">
+                    </div>
+                    <button class="btn btn-primary btn-block" onclick="getUrlStats()"><i class="fas fa-chart-line"></i> Get Statistics</button>
+                    
+                    <div id="stats-result" class="result">
+                        <h3>URL Statistics</h3>
+                        <div class="result-details">
+                            <div class="result-label">Original URL:</div>
+                            <div class="result-value" id="stats-original-url"></div>
+                            
+                            <div class="result-label">Short Code:</div>
+                            <div class="result-value" id="stats-short-code-value"></div>
+                            
+                            <div class="result-label">Created:</div>
+                            <div class="result-value" id="stats-created-at"></div>
+                            
+                            <div class="result-label">Last Updated:</div>
+                            <div class="result-value" id="stats-updated-at"></div>
+                        </div>
+                        
+                        <div class="stats-group">
+                            <div class="stat-item">
+                                <div class="stat-value" id="stats-access-count">0</div>
+                                <div class="stat-label">Total Clicks</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="notification" id="notification"></div>
+
+    <footer class="footer">
+        <div class="container">
+            <p>URL Shortener Service - A simple and efficient way to manage your URLs</p>
+        </div>
+    </footer>
+
+    <script>
+        // Tab functionality
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                // Remove active class from all tabs and contents
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                
+                // Add active class to clicked tab and corresponding content
+                tab.classList.add('active');
+                document.getElementById(`${tab.dataset.tab}-tab`).classList.add('active');
+            });
+        });
+
+        // Show notification function
+        function showNotification(message, type = 'success') {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.className = `notification ${type}`;
+            notification.style.display = 'block';
+            
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, 3000);
+        }
+
+        // Copy to clipboard function
+        function copyToClipboard(elementId) {
+            const element = document.getElementById(elementId);
+            const text = element.textContent;
+            
+            navigator.clipboard.writeText(text).then(() => {
+                showNotification('Copied to clipboard!');
+            }).catch(err => {
+                showNotification('Failed to copy: ' + err, 'error');
+            });
+        }
+
+        // Switch to manage tab function
+        function switchToManage() {
+            // Get short code from creation result
+            const shortCode = document.getElementById('short-code-value').textContent;
+            
+            // Switch to manage tab
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            
+            document.querySelector('.tab[data-tab="manage"]').classList.add('active');
+            document.getElementById('manage-tab').classList.add('active');
+            
+            // Set the short code in the manage tab
+            document.getElementById('manage-short-code').value = shortCode;
+            
+            // Get URL details
+            getUrlDetails();
+        }
+
+        // Create short URL function
+        function shortenUrl() {
+            const url = document.getElementById('long-url').value;
+            if (!url) {
+                showNotification('Please enter a URL', 'error');
+                return;
+            }
+            
+            fetch('/api/shorten', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ url: url }),
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Error creating short URL');
+                }
+                return response.json();
+            })
+            .then(data => {
+                const shortUrl = `${window.location.origin}/api/r/${data.short_code}`;
+                
+                // Update result elements
+                document.getElementById('short-url-value').innerHTML = `<a href="${shortUrl}" target="_blank">${shortUrl}</a>`;
+                document.getElementById('original-url-value').textContent = data.url;
+                document.getElementById('short-code-value').textContent = data.short_code;
+                document.getElementById('created-at-value').textContent = new Date(data.created_at).toLocaleString();
+                
+                // Show the result
+                document.getElementById('shorten-result').style.display = 'block';
+                
+                // Show success notification
+                showNotification('URL shortened successfully!');
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showNotification(error.message, 'error');
+            });
+        }
+        
+        // Get URL details function
+        function getUrlDetails() {
+            const shortCode = document.getElementById('manage-short-code').value;
+            
+            if (!shortCode) {
+                showNotification('Please enter a short code', 'error');
+                return;
+            }
+            
+            fetch(`/api/shorten/${shortCode}`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('URL not found');
+                }
+                return response.json();
+            })
+            .then(data => {
+                // Update result elements
+                document.getElementById('details-original-url').textContent = data.url;
+                document.getElementById('details-short-code').textContent = data.short_code;
+                document.getElementById('details-created-at').textContent = new Date(data.created_at).toLocaleString();
+                document.getElementById('details-updated-at').textContent = new Date(data.updated_at).toLocaleString();
+                
+                // Set the current URL in the update input
+                document.getElementById('update-url').value = data.url;
+                
+                // Show the result
+                document.getElementById('details-result').style.display = 'block';
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showNotification(error.message, 'error');
+            });
+        }
+        
+        // Update URL function
+        function updateUrl() {
+            const shortCode = document.getElementById('manage-short-code').value;
+            const newUrl = document.getElementById('update-url').value;
+            
+            if (!shortCode || !newUrl) {
+                showNotification('Please enter both short code and new URL', 'error');
+                return;
+            }
+            
+            fetch(`/api/shorten/${shortCode}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ url: newUrl }),
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Error updating URL');
+                }
+                return response.json();
+            })
+            .then(data => {
+                // Update result elements
+                document.getElementById('details-original-url').textContent = data.url;
+                document.getElementById('details-updated-at').textContent = new Date(data.updated_at).toLocaleString();
+                
+                // Show success notification
+                showNotification('URL updated successfully!');
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showNotification(error.message, 'error');
+            });
+        }
+        
+        // Delete URL function
+        function deleteUrl() {
+            const shortCode = document.getElementById('manage-short-code').value;
+            
+            if (!shortCode) {
+                showNotification('Please enter a short code', 'error');
+                return;
+            }
+            
+            if (!confirm('Are you sure you want to delete this URL?')) {
+                return;
+            }
+            
+            fetch(`/api/shorten/${shortCode}`, {
+                method: 'DELETE',
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Error deleting URL');
+                }
+                
+                // Clear the form and hide the result
+                document.getElementById('manage-short-code').value = '';
+                document.getElementById('update-url').value = '';
+                document.getElementById('details-result').style.display = 'none';
+                
+                // Show success notification
+                showNotification('URL deleted successfully!');
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showNotification(error.message, 'error');
+            });
+        }
+        
+        // Get URL stats function
+        function getUrlStats() {
+            const shortCode = document.getElementById('stats-short-code').value;
+            
+            if (!shortCode) {
+                showNotification('Please enter a short code', 'error');
+                return;
+            }
+            
+            fetch(`/api/shorten/${shortCode}/stats`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('URL not found');
+                }
+                return response.json();
+            })
+            .then(data => {
+                // Update result elements
+                document.getElementById('stats-original-url').textContent = data.url;
+                document.getElementById('stats-short-code-value').textContent = data.short_code;
+                document.getElementById('stats-created-at').textContent = new Date(data.created_at).toLocaleString();
+                document.getElementById('stats-updated-at').textContent = new Date(data.updated_at).toLocaleString();
+                document.getElementById('stats-access-count').textContent = data.access_count;
+                
+                // Show the result
+                document.getElementById('stats-result').style.display = 'block';
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showNotification(error.message, 'error');
+            });
+        }
+    </script>
+</body>
+</html>
